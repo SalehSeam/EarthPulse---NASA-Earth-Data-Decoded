@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; connect-src https://power.larc.nasa.gov; img-src 'self' data: https://server.arcgisonline.com https://cdnjs.cloudflare.com; frame-ancestors 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>EarthPulse – NASA Earth Data, Decoded.</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" crossorigin="anonymous">
+<style>
+:root{--bg:#06101a;--panel:#0d1c2b;--line:#1d3347;--ink:#e8f0f6;--mute:#8da4b8;--accent:#f2a33a;--cool:#4fc3b5;--bad:#ff7a6b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 Georgia,"Times New Roman",serif}
+h1,h2,h3,button,label,select,input,.sans{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+a{color:var(--cool)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+main,header,footer{max-width:1080px;margin:0 auto;padding:0 20px}
+.hero{padding:72px 0 40px}
+.hero h1{font-size:clamp(2.4rem,7vw,4.6rem);margin:0;letter-spacing:-.02em;line-height:1}
+.hero p{max-width:60ch;color:var(--mute);font-size:1.15rem}
+.pulse{width:100%;max-width:520px;height:60px;margin-top:24px}
+.pulse path{stroke:var(--accent);stroke-width:2.5;fill:none;stroke-dasharray:900;stroke-dashoffset:900;animation:draw 2.4s ease forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+@media(prefers-reduced-motion:reduce){.pulse path{animation:none;stroke-dashoffset:0}}
+.btn{background:var(--accent);color:#1a1004;border:0;border-radius:6px;padding:12px 22px;font-size:1rem;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn:disabled{opacity:.6;cursor:wait}
+section{padding:36px 0;border-top:1px solid var(--line)}
+h2{font-size:1.5rem;margin:0 0 14px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:800px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px}
+label{display:block;font-size:.9rem;color:var(--mute);margin:12px 0 4px}
+select,input{width:100%;background:#08141f;color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:10px;font-size:1rem}
+.row{display:flex;gap:12px}.row>div{flex:1}
+svg text{font-family:system-ui,sans-serif}
+#map{width:100%;height:340px;border-radius:8px;background:#08141f}.leaflet-container{font-family:system-ui,sans-serif}
+.badge{display:inline-block;border:1px solid var(--accent);border-radius:999px;padding:6px 14px;margin-bottom:18px;font-family:system-ui,sans-serif;font-size:.85rem;line-height:1.35}.badge b{color:var(--accent)}
+.steps{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;counter-reset:s}.steps li{counter-increment:s;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px;font-family:system-ui,sans-serif;font-size:.92rem}.steps li:before{content:counter(s);color:var(--accent);font-weight:800;display:block;font-size:1.3rem}.steps b{display:block}.steps span{color:var(--mute);font-size:.85rem}
+.flow{font-family:system-ui,sans-serif;font-size:1.05rem}.flow b{color:var(--accent)}
+.status{min-height:1.6em;color:var(--cool);font-family:system-ui,sans-serif}
+.status.err{color:var(--bad)}
+.big{font-family:system-ui,sans-serif;font-size:clamp(1.8rem,5vw,2.6rem);font-weight:800}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-top:14px}
+.kv div{border-left:3px solid var(--line);padding-left:10px}
+.kv b{display:block;font-family:system-ui,sans-serif;font-size:1.2rem}
+.kv span{color:var(--mute);font-size:.85rem;font-family:system-ui,sans-serif}
+#chart{width:100%;height:auto;background:#08141f;border-radius:8px}
+.note{color:var(--mute);font-size:.9rem}
+footer{padding:30px 20px 50px;border-top:1px solid var(--line);color:var(--mute);font-size:.9rem}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="badge"><b>NASA SPACE APPS CHALLENGE 2026</b><br>Be An Earth System Trend Detective!</div>
+  <h1>EarthPulse</h1>
+  <p class="sans" style="color:var(--accent);margin:.3em 0 0;font-weight:700">NASA Earth Data, Decoded.</p>
+  <p>Explore how Earth's environmental conditions change over time using NASA data and statistical trend analysis.</p>
+  <svg class="pulse" viewBox="0 0 520 60" aria-hidden="true"><path d="M0 40 L90 40 L110 38 L130 44 L150 20 L170 52 L190 36 L260 34 L300 30 L340 32 L400 22 L460 18 L520 10"/></svg>
+  <p><a class="btn" href="#explore">Explore Earth Trends</a> <a class="btn ghost" href="#method">How It Works</a></p>
+</header>
+<main>
+<section aria-labelledby="h-why">
+  <h2 id="h-why">Why EarthPulse?</h2>
+  <p>NASA publishes huge amounts of Earth data, but raw time series are hard to read and easy to misread. EarthPulse fetches the data for you, tests whether a change is real or just noise, and explains it in plain words.</p>
+  <p class="flow">Complex NASA Earth data <b>→</b> EarthPulse analysis <b>→</b> understandable environmental insight</p>
+</section>
+<section id="explore" aria-labelledby="h-explore">
+  <h2 id="h-explore">Pick a place and a period</h2>
+  <div class="grid">
+    <div class="panel">
+      <label for="loc">Location</label>
+      <select id="loc"></select>
+      <div class="row">
+        <div><label for="lat">Latitude</label><input id="lat" type="number" step="0.01" min="-90" max="90"></div>
+        <div><label for="lon">Longitude</label><input id="lon" type="number" step="0.01" min="-180" max="180"></div>
+      </div>
+      <label for="var">Variable</label>
+      <select id="var"><option value="T2M">Temperature at 2 Meters (T2M)</option></select>
+      <div class="row">
+        <div><label for="sy">Start year</label><input id="sy" type="number" value="2000"></div>
+        <div><label for="ey">End year</label><input id="ey" type="number"></div>
+      </div>
+      <p><button class="btn" id="go">Analyze Trend</button></p>
+      <div class="status" id="status" role="status" aria-live="polite"></div>
+    </div>
+    <div class="panel">
+      <div id="map" aria-label="Interactive world map. Click to choose a location."></div>
+      <p class="sans" id="selname" style="margin:10px 0 0"></p>
+      <p class="note">Click the map to choose a point, or use the list. Map tiles © Esri. Your own location is never requested.</p>
+    </div>
+  </div>
+</section>
+
+<section id="results" hidden aria-labelledby="h-res">
+  <h2 id="h-res">Results</h2>
+  <div class="panel">
+    <div class="big" id="trend"></div>
+    <p id="verdict"></p>
+    <div class="kv" id="kv"></div>
+  </div>
+  <div class="panel" style="margin-top:20px">
+    <svg id="chart" viewBox="0 0 760 340" role="img" aria-labelledby="chartDesc"></svg>
+    <p class="note" id="chartDesc"></p>
+  </div>
+  <div class="grid" style="margin-top:20px">
+    <div class="panel"><h3>What does this mean?</h3><p id="explain"></p></div>
+    <div class="panel"><h3>Data quality</h3><div class="kv" id="dq"></div></div>
+  </div>
+</section>
+
+<section id="method" aria-labelledby="h-m">
+  <h2 id="h-m">How it works</h2>
+  <ol class="steps">
+    <li><b>Get NASA data</b><span>We request your place and years from NASA POWER.</span></li>
+    <li><b>Validate data</b><span>Missing values are counted, never guessed.</span></li>
+    <li><b>Detect trend</b><span>Is the series going up, down, or neither?</span></li>
+    <li><b>Measure change</b><span>How much per year, and in total?</span></li>
+    <li><b>Test significance</b><span>Could random variation explain it?</span></li>
+    <li><b>Explain result</b><span>A plain-language summary, no invented causes.</span></li>
+  </ol>
+  <p class="note">Technical detail: data come from the <a href="https://power.larc.nasa.gov/" rel="noopener noreferrer">NASA POWER</a> monthly API (annual means, -999 fill values removed). Our calculations, not NASA's: Mann-Kendall test (tie-corrected, two-sided, α = 0.05) and Sen's slope. The explanation uses fixed templates, not AI. Limitations: annual means can be autocorrelated, which may overstate significance; POWER blends satellite and model data rather than station records; a trend alone does not show its cause.</p>
+</section>
+<section aria-labelledby="h-t">
+  <h2 id="h-t">About the team</h2>
+  <p><b>NovaCore</b> <br>
+   Abu Saleh Seam (Developer / Project Lead) <br>
+   Miftahul Jannat (Developer / Team Member).</p>
+</section>
+</main>
+<footer>
+  <p>Data source: <a href="https://power.larc.nasa.gov/" rel="noopener noreferrer">NASA POWER</a> (NASA Langley Research Center). Built for NASA Space Apps Challenge 2026 — Be An Earth System Trend Detective! EarthPulse is not an official NASA product and is not endorsed by NASA.</p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" crossorigin="anonymous"></script>
+<script>
+"use strict";
+const LOCATIONS = {
+  "Dhaka, Bangladesh":[23.81,90.41],"Bangladesh (centre)":[23.7,90.35],"Delhi, India":[28.61,77.21],
+  "London, UK":[51.51,-0.13],"New York, USA":[40.71,-74.01],"Sao Paulo, Brazil":[-23.55,-46.63],
+  "Cairo, Egypt":[30.04,31.24],"Nairobi, Kenya":[-1.29,36.82],"Tokyo, Japan":[35.68,139.69],
+  "Sydney, Australia":[-33.87,151.21],"Anchorage, USA":[61.22,-149.9],"Reykjavik, Iceland":[64.15,-21.94]
+};
+const VARIABLES = {T2M:{name:"Temperature at 2 Meters",unit:"°C"}};
+const MIN_YEARS = 10, MAX_SPAN = 45, FIRST_YEAR = 1981, ALPHA = 0.05, MAX_MISSING = 0.2, TIMEOUT_MS = 20000;
+const LATEST_YEAR = new Date().getFullYear() - 1;
+const $ = id => document.getElementById(id);
+const cache = new Map();
+let lastCall = 0;
+
+/* ---------- single location state ---------- */
+const state = {name:"", lat:0, lon:0};
+let busy = false;
+const fmtCoord = (la, lo) => `${Math.abs(la).toFixed(2)}° ${la >= 0 ? "N" : "S"}, ${Math.abs(lo).toFixed(2)}° ${lo >= 0 ? "E" : "W"}`;
+const locSel = $("loc");
+for (const name of Object.keys(LOCATIONS)) locSel.add(new Option(name, name));
+$("ey").value = LATEST_YEAR;
+const map = L.map("map", {worldCopyJump:true, minZoom:2}).setView([23.7, 90.35], 4);
+const ESRI = "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/";
+L.tileLayer(ESRI + "World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}", {maxZoom:10, attribution:"Tiles © Esri — Esri, DeLorme, NAVTEQ"}).addTo(map);
+L.tileLayer(ESRI + "World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}", {maxZoom:10}).addTo(map);
+const marker = L.circleMarker([0, 0], {radius:9, color:"#f2a33a", weight:3, fillColor:"#f2a33a", fillOpacity:.35}).addTo(map);
+function setLocation(name, lat, lon, pan){
+  state.name = name; state.lat = +lat.toFixed(2); state.lon = +lon.toFixed(2);
+  $("lat").value = state.lat; $("lon").value = state.lon;
+  if (Object.hasOwn(LOCATIONS, name)) locSel.value = name; else locSel.selectedIndex = -1;
+  marker.setLatLng([state.lat, state.lon]);
+  $("selname").textContent = `Selected: ${state.name} (${fmtCoord(state.lat, state.lon)})`;
+  if (pan) map.setView([state.lat, state.lon], Math.max(map.getZoom(), 4));
+}
+function syncFromInputs(){ // typed coordinates become the one source of truth
+  const la = parseFloat($("lat").value), lo = parseFloat($("lon").value);
+  if (!(la >= -90 && la <= 90 && lo >= -180 && lo <= 180)) throw new UserError("Please select a valid location.");
+  if (+la.toFixed(2) !== state.lat || +lo.toFixed(2) !== state.lon) setLocation("Custom point", la, lo, true);
+}
+locSel.onchange = () => { if (!busy) setLocation(locSel.value, ...LOCATIONS[locSel.value], true); };
+$("lat").onchange = $("lon").onchange = () => { try { syncFromInputs(); status(""); } catch (e) { status(e.message, true); } };
+map.on("click", e => { if (busy) return; const lon = ((e.latlng.lng + 180) % 360 + 360) % 360 - 180; setLocation("Custom point", e.latlng.lat, lon, false); });
+setLocation("Dhaka, Bangladesh", ...LOCATIONS["Dhaka, Bangladesh"], false);
+function setBusy(b){ busy = b; for (const id of ["loc","lat","lon","sy","ey","var"]) $(id).disabled = b; }
+
+/* ---------- validation ---------- */
+class UserError extends Error {}
+function readInputs(){
+  syncFromInputs();
+  const {lat, lon} = state;
+  const sy = parseInt($("sy").value, 10), ey = parseInt($("ey").value, 10), v = $("var").value;
+  if (!(lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180)) throw new UserError("Please select a valid location.");
+  if (!Object.hasOwn(VARIABLES, v)) throw new UserError("Please select a supported variable.");
+  if (!Number.isInteger(sy) || !Number.isInteger(ey) || sy < FIRST_YEAR || ey > LATEST_YEAR || ey - sy + 1 < MIN_YEARS || ey - sy + 1 > MAX_SPAN)
+    throw new UserError(`Please select a valid year range: ${FIRST_YEAR}–${LATEST_YEAR}, between ${MIN_YEARS} and ${MAX_SPAN} years.`);
+  return {name:state.name, lat, lon, sy, ey, v};
+}
+
+/* ---------- NASA POWER ---------- */
+async function fetchPower({lat, lon, sy, ey, v}){
+  const key = [lat, lon, v, sy, ey].join("|"), hit = cache.get(key);
+  if (hit && Date.now() - hit.t < 3600e3) return hit.data;
+  const q = new URLSearchParams({parameters:v, community:"RE", latitude:lat, longitude:lon, start:sy, end:ey, format:"JSON"});
+  const url = "https://power.larc.nasa.gov/api/temporal/monthly/point?" + q;
+  const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), TIMEOUT_MS);
+  let res;
+  try { res = await fetch(url, {signal:ctl.signal, referrerPolicy:"no-referrer"}); }
+  catch (e) { throw new UserError(e.name === "AbortError" ? "NASA data took too long to arrive. Please try again." : "NASA data is temporarily unavailable. Please try again."); }
+  finally { clearTimeout(timer); }
+  if (res.status === 429) throw new UserError("Too many requests were made. Please wait a moment and try again.");
+  if (res.status === 400 || res.status === 404 || res.status === 422) throw new UserError("NASA could not process this location or period. Please adjust it and try again.");
+  if (!res.ok) throw new UserError("NASA data is temporarily unavailable. Please try again.");
+  let json;
+  try { json = await res.json(); } catch { throw new UserError("NASA returned data in an unexpected format."); }
+  const series = json && json.properties && json.properties.parameter && json.properties.parameter[v];
+  if (!series || typeof series !== "object") throw new UserError("NASA returned data in an unexpected format.");
+  const data = {series, fill: json.header && typeof json.header.fill_value === "number" ? json.header.fill_value : -999, at: new Date().toISOString()};
+  cache.set(key, {t:Date.now(), data});
+  return data;
+}
+function annualSeries(raw, sy, ey){
+  const xs = [], ys = []; let missing = 0;
+  for (let y = sy; y <= ey; y++){
+    const val = raw.series[y + "13"];   // month 13 = annual mean in POWER monthly output
+    if (typeof val === "number" && val !== raw.fill && isFinite(val)){ xs.push(y); ys.push(val); } else missing++;
+  }
+  return {xs, ys, missing, expected: ey - sy + 1};
+}
+
+/* ---------- statistics ---------- */
+function normCdf(z){ // Abramowitz–Stegun 7.1.26
+  const t = 1 / (1 + 0.3275911 * Math.abs(z) / Math.SQRT2), a = [0.254829592,-0.284496736,1.421413741,-1.453152027,1.061405429];
+  const erf = 1 - ((((a[4]*t + a[3])*t + a[2])*t + a[1])*t + a[0]) * t * Math.exp(-z*z/2);
+  return 0.5 * (1 + (z < 0 ? -erf : erf));
+}
+const median = a => { const s = [...a].sort((p,q)=>p-q), m = s.length >> 1; return s.length % 2 ? s[m] : (s[m-1] + s[m]) / 2; };
+function mannKendall(y){
+  const n = y.length; let S = 0;
+  for (let i = 0; i < n - 1; i++) for (let j = i + 1; j < n; j++) S += Math.sign(y[j] - y[i]);
+  const counts = new Map(); y.forEach(v => counts.set(v, (counts.get(v) || 0) + 1));
+  let tie = 0; counts.forEach(t => { if (t > 1) tie += t * (t - 1) * (2*t + 5); });
+  const varS = (n * (n - 1) * (2*n + 5) - tie) / 18;
+  const z = varS <= 0 ? 0 : S > 0 ? (S - 1) / Math.sqrt(varS) : S < 0 ? (S + 1) / Math.sqrt(varS) : 0;
+  return {S, z, p: 2 * (1 - normCdf(Math.abs(z)))};
+}
+function senSlope(x, y){
+  const sl = [];
+  for (let i = 0; i < x.length - 1; i++) for (let j = i + 1; j < x.length; j++) sl.push((y[j] - y[i]) / (x[j] - x[i]));
+  const slope = median(sl), intercept = median(y.map((v,i) => v - slope * x[i]));
+  return {slope, intercept};
+}
+
+/* ---------- UI ---------- */
+const fmt = (n, d=2) => (n > 0 ? "+" : n < 0 ? "−" : "") + Math.abs(n).toFixed(d);
+function status(msg, err){ const s = $("status"); s.textContent = msg; s.className = "status" + (err ? " err" : ""); }
+const wait = ms => new Promise(r => setTimeout(r, ms));
+function kv(el, items){ el.innerHTML = items.map(([k,v]) => `<div><b></b><span></span></div>`).join(""); el.querySelectorAll("div").forEach((d,i) => { d.firstChild.textContent = items[i][1]; d.lastChild.textContent = items[i][0]; }); }
+
+$("go").onclick = async () => {
+  const btn = $("go");
+  if (Date.now() - lastCall < 1500) return;
+  lastCall = Date.now();
+  let inp;
+  try { inp = readInputs(); } catch (e) { return status(e.message, true); }
+  btn.disabled = true; setBusy(true); $("results").hidden = true;
+  try {
+    status("Retrieving NASA data…");
+    const raw = await fetchPower(inp);
+    status("Analyzing trend…"); await wait(250);
+    const s = annualSeries(raw, inp.sy, inp.ey);
+    const missPct = s.missing / s.expected;
+    if (s.xs.length < MIN_YEARS || missPct > MAX_MISSING) { renderInsufficient(inp, s, raw); status("", false); return; }
+    const mk = mannKendall(s.ys), sen = senSlope(s.xs, s.ys);
+    status("Generating Earth insight…"); await wait(250);
+    render(inp, s, raw, mk, sen); status("");
+  } catch (e) {
+    status(e instanceof UserError ? e.message : "Something went wrong. Please try again.", true);
+  } finally { btn.disabled = false; setBusy(false); }
+};
+
+function qualityItems(inp, s, raw){
+  return [["Observations (annual means)", s.xs.length + " of " + s.expected], ["Missing years", s.missing],
+    ["Missing share", (100 * s.missing / s.expected).toFixed(1) + "%"], ["Source", "NASA POWER, monthly API"],
+    ["Retrieved", raw.at.replace("T"," ").slice(0,16) + " UTC"], ["API status", "OK (live NASA data)"]];
+}
+function show(){ $("results").hidden = false; $("results").scrollIntoView({behavior: matchMedia("(prefers-reduced-motion:reduce)").matches ? "auto" : "smooth"}); }
+function renderInsufficient(inp, s, raw){
+  $("trend").textContent = "Insufficient data"; $("verdict").textContent = "There is not enough valid data to calculate a reliable trend.";
+  $("kv").innerHTML = ""; $("chart").innerHTML = ""; $("chartDesc").textContent = ""; $("explain").textContent = "No trend was calculated, so no conclusion is drawn.";
+  kv($("dq"), qualityItems(inp, s, raw)); show();
+}
+function render(inp, s, raw, mk, sen){
+  const V = VARIABLES[inp.v], sig = mk.p < ALPHA, dir = sen.slope > 0 ? "inc" : sen.slope < 0 ? "dec" : "flat";
+  const label = !sig ? "No significant trend" : dir === "inc" ? "↗ Increasing" : dir === "dec" ? "↘ Decreasing" : "No significant trend";
+  const span = s.xs[s.xs.length-1] - s.xs[0], total = sen.slope * span;
+  const startFit = sen.intercept + sen.slope * s.xs[0], endFit = sen.intercept + sen.slope * s.xs[s.xs.length-1];
+  $("trend").textContent = label;
+  $("verdict").textContent = sig ? "Statistically significant trend (Mann-Kendall p < 0.05)." : "No statistically significant trend detected (Mann-Kendall p ≥ 0.05).";
+  kv($("kv"), [["Location", inp.name], ["Coordinates", fmtCoord(inp.lat, inp.lon)], ["Variable", `${V.name} (${inp.v})`], ["Period requested", `${inp.sy}–${inp.ey}`],
+    ["Total change (Sen)", `${fmt(total)} ${V.unit}`], ["Trend slope", `${fmt(sen.slope,3)} ${V.unit}/year`],
+    ["Start value (observed)", `${s.ys[0].toFixed(2)} ${V.unit}`], ["End value (observed)", `${s.ys[s.ys.length-1].toFixed(2)} ${V.unit}`],
+    ["Start / end of trend line", `${startFit.toFixed(2)} / ${endFit.toFixed(2)} ${V.unit}`],
+    ["Test", "Mann-Kendall + Sen's slope"], ["p-value", mk.p < 0.0001 ? "< 0.0001" : mk.p.toFixed(4)], ["Threshold α", ALPHA], ["Frequency", "Annual mean of monthly data"]]);
+  const word = dir === "inc" ? "increased" : "decreased";
+  $("explain").textContent = sig
+    ? `${V.name} ${word} over the selected period. The test indicates the trend is unlikely to be explained by random year-to-year variation alone. In plain terms: over these years this location became ${dir === "inc" ? "warmer" : "cooler"}, by about ${Math.abs(total).toFixed(2)} ${V.unit} in total. This describes the data; it does not by itself identify a cause.`
+    : `The data do not show a statistically significant trend for this location and period. Values moved from year to year, but not in a consistent enough direction to rule out random variation.`;
+  kv($("dq"), qualityItems(inp, s, raw));
+  drawChart(s, sen, V, inp);
+  $("chartDesc").textContent = `Chart for ${inp.name} (${fmtCoord(inp.lat, inp.lon)}): annual mean ${V.name} from ${s.xs[0]} to ${s.xs[s.xs.length-1]}, ${s.ys[0].toFixed(2)} to ${s.ys[s.ys.length-1].toFixed(2)} ${V.unit}. Dashed line is Sen's slope (${fmt(sen.slope,3)} ${V.unit}/year). Source: NASA POWER.`;
+  show();
+}
+function drawChart(s, sen, V, inp){
+  const W = 760, H = 340, L = 56, R = 16, T = 20, B = 44;
+  const x0 = s.xs[0], x1 = s.xs[s.xs.length-1];
+  const lineY = s.xs.map(x => sen.intercept + sen.slope * x), all = s.ys.concat(lineY);
+  let lo = Math.min(...all), hi = Math.max(...all); const pad = (hi - lo || 1) * .1; lo -= pad; hi += pad;
+  const X = x => L + (x - x0) / (x1 - x0 || 1) * (W - L - R), Y = y => T + (hi - y) / (hi - lo) * (H - T - B);
+  let g = `<text x="${L}" y="13" fill="#e8f0f6" font-size="13" font-weight="700">${inp.name} · ${fmtCoord(inp.lat, inp.lon)} · ${inp.sy}–${inp.ey}</text>`;
+  for (let i = 0; i <= 4; i++){ const v = lo + (hi - lo) * i / 4; g += `<line x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}" stroke="#1d3347"/><text x="${L-8}" y="${Y(v)+4}" fill="#8da4b8" font-size="12" text-anchor="end">${v.toFixed(1)}</text>`; }
+  const step = Math.ceil((x1 - x0) / 7);
+  for (let x = x0; x <= x1; x += step) g += `<text x="${X(x)}" y="${H-B+20}" fill="#8da4b8" font-size="12" text-anchor="middle">${x}</text>`;
+  const raw = s.xs.map((x,i) => `${X(x).toFixed(1)},${Y(s.ys[i]).toFixed(1)}`).join(" ");
+  g += `<polyline points="${raw}" fill="none" stroke="#4fc3b5" stroke-width="1.5"/>`;
+  s.xs.forEach((x,i) => g += `<circle cx="${X(x)}" cy="${Y(s.ys[i])}" r="3.5" fill="#4fc3b5"><title>${x}: ${s.ys[i].toFixed(2)} ${V.unit}</title></circle>`);
+  g += `<line x1="${X(x0)}" y1="${Y(lineY[0])}" x2="${X(x1)}" y2="${Y(lineY[lineY.length-1])}" stroke="#f2a33a" stroke-width="2.5" stroke-dasharray="8 5"/>`;
+  g += `<text x="${L-40}" y="${T+(H-T-B)/2}" fill="#8da4b8" font-size="12" text-anchor="middle" transform="rotate(-90 ${L-40} ${T+(H-T-B)/2})">${V.name} (${V.unit})</text>`;
+  g += `<g font-size="12"><circle cx="${L+10}" cy="${H-8}" r="4" fill="#4fc3b5"/><text x="${L+20}" y="${H-4}" fill="#e8f0f6">NASA POWER annual mean (dots and thin line)</text><line x1="${L+300}" x2="${L+330}" y1="${H-8}" y2="${H-8}" stroke="#f2a33a" stroke-width="2.5" stroke-dasharray="6 4"/><text x="${L+338}" y="${H-4}" fill="#e8f0f6">Sen's slope trend (our calculation)</text></g>`;
+  $("chart").innerHTML = g;
+}
+</script>
+</body>
+</html>
