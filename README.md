@@ -1,4 +1,4 @@
-# 🌍 EarthPulse — NASA Earth Data, Decoded.
+# 🌍 EarthPulse - NASA Earth Data, Decoded.
 
 > Explore environmental trends using real NASA Earth data, statistical analysis, and clear visual insights.
 
@@ -62,9 +62,9 @@ EarthPulse was created to make this process easier.
 
 EarthPulse allows a user to select:
 
-- **Where** — a location on Earth
-- **What** — an environmental variable
-- **When** — a time period
+- **Where** - a location on Earth
+- **What** - an environmental variable
+- **When** - a time period
 
 The application then automatically retrieves the corresponding NASA POWER data and performs the analysis.
 
@@ -84,13 +84,13 @@ EarthPulse handles these steps automatically.
 
 EarthPulse uses:
 
-**NASA POWER — Prediction Of Worldwide Energy Resources**
+**NASA POWER - Prediction Of Worldwide Energy Resources**
 
 NASA POWER provides publicly accessible environmental and meteorological data.
 
 ### Current Variable
 
-**T2M — Temperature at 2 Meters**
+**T2M - Temperature at 2 Meters**
 
 - Unit: °C
 - Source: NASA POWER
@@ -549,7 +549,7 @@ EarthPulse describes observed data and does not claim causal explanations.
 
 The current version focuses on:
 
-**T2M — Temperature at 2 Meters**
+**T2M - Temperature at 2 Meters**
 
 Additional environmental variables may be added in future versions.
 
@@ -601,7 +601,7 @@ These are future possibilities and are **not represented as current features**.
 
 **Project:**
 
-> EarthPulse — NASA Earth Data, Decoded.
+> EarthPulse - NASA Earth Data, Decoded.
 
 **Team:**
 
@@ -613,7 +613,7 @@ These are future possibilities and are **not represented as current features**.
 
 ### NASA Data
 
-**NASA POWER — Prediction Of Worldwide Energy Resources**
+**NASA POWER - Prediction Of Worldwide Energy Resources**
 
 NASA Langley Research Center
 
